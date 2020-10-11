@@ -1,9 +1,9 @@
 # Metada file
-name: "Is there an open release/**?"
-description: 'Detect if there is any open pull request from a "release/**"" branch, to try to prevent an unwanted merge on the branch "develop"'
+name: Automerge Backport Pull Request
+description: Action to approve and merge Backport Pull Request to develop
 inputs:
   GITHUB_TOKEN:
-    description: The GitHub token used to create an authenticated client.
+    description: The GitHub token used to modify the repository.
 runs:
   using: "node12"
   main: "dist/app.js"

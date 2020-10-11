@@ -15,6 +15,7 @@ async function run() {
       throw new Error("Pull request number is required");
     }
 
+    // Approve Pull Request
     await octokit.pulls.createReview({
       owner: repositoryOwner,
       repo: repositoryName,
@@ -23,6 +24,7 @@ async function run() {
       body: "Github Actions loves this Backport",
     });
 
+    // Merge Pull Request
     await octokit.pulls.merge({
       owner: repositoryOwner,
       repo: repositoryName,
