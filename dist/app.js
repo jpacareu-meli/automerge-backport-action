@@ -30,6 +30,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const github = __importStar(require("@actions/github"));
+const merge_1 = require("./merge");
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -41,19 +42,14 @@ function run() {
             if (!Number.isInteger(payload === null || payload === void 0 ? void 0 : payload.number)) {
                 throw new Error("Pull request number is required");
             }
-            yield octokit.pulls.createReview({
+            const prInfo = {
                 owner: repositoryOwner,
                 repo: repositoryName,
                 pull_number: payload === null || payload === void 0 ? void 0 : payload.number,
                 event: "APPROVE",
                 body: "Github Actions loves this Backport",
-            });
-            yield octokit.pulls.merge({
-                owner: repositoryOwner,
-                repo: repositoryName,
-                pull_number: payload === null || payload === void 0 ? void 0 : payload.number,
-                merge_method: "merge",
-            });
+            };
+            yield merge_1.tryMerge(prInfo);
         }
         catch (error) {
             core.setFailed(error.message);

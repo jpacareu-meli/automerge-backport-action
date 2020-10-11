@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
+import { tryMerge } from "./merge";
 
 async function run() {
   try {
@@ -15,22 +16,16 @@ async function run() {
       throw new Error("Pull request number is required");
     }
 
-    // Approve Pull Request
-    await octokit.pulls.createReview({
+    const prInfo = {
       owner: repositoryOwner,
       repo: repositoryName,
       pull_number: payload?.number,
       event: "APPROVE",
       body: "Github Actions loves this Backport",
-    });
+    }
 
-    // Merge Pull Request
-    await octokit.pulls.merge({
-      owner: repositoryOwner,
-      repo: repositoryName,
-      pull_number: payload?.number,
-      merge_method: "merge",
-    });
+    await tryMerge(prInfo);
+    
   } catch (error) {
     core.setFailed(error.message);
   }
