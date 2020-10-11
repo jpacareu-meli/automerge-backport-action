@@ -17,6 +17,7 @@ async function run() {
     }
 
     const prInfo = {
+      octokit,
       owner: repositoryOwner,
       repo: repositoryName,
       pull_number: payload?.number,
