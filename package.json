@@ -1,0 +1,29 @@
+{
+  "name": "is-release-open-action",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpacareu-meli/is-release-open-action.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jpacareu-meli/is-release-open-action/issues"
+  },
+  "homepage": "https://github.com/jpacareu-meli/is-release-open-action#readme",
+  "devDependencies": {
+    "tslint": "6.1.3",
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "@actions/core": "1.2.6",
+    "@actions/github": "4.0.0",
+    "octonode": "0.9.5"
+  }
+}

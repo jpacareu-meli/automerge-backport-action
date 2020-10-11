@@ -1,0 +1,9 @@
+# Metada file
+name: "Is there an open release/**?"
+description: 'Detect if there is any open pull request from a "release/**"" branch, to try to prevent an unwanted merge on the branch "develop"'
+inputs:
+  GITHUB_TOKEN:
+    description: The GitHub token used to create an authenticated client.
+runs:
+  using: "node12"
+  main: "dist/app.js"
