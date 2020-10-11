@@ -3,7 +3,7 @@ import * as core from "@actions/core";
 const mergeRetries = 5;
 const mergeRetrySleep = 60000;
 
-async function retry(retries: number, retrySleep: number, doInitial: any, doRetry: any, doFailed: any) {
+const retry = async (retries: number, retrySleep: number, doInitial: any, doRetry: any, doFailed: any) => {
   const initialResult = await doInitial();
   if (initialResult === "success") {
     return true;
@@ -33,11 +33,35 @@ async function retry(retries: number, retrySleep: number, doInitial: any, doRetr
 
   await doFailed();
   return false;
-}
+};
 
-function sleep(ms: number) {
+const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
+};
+
+const getPullRequest = async ({ octokit, owner, repo, pull_number }: any) => {
+  const { data: pr } = await octokit.pulls.get({
+    owner,
+    repo,
+    pull_number,
+  });
+  return pr;
+};
+
+const mergePullRequest = async ({ octokit, owner, repo, pull_number, merge_method }: any) => {
+  try {
+    await octokit.pulls.merge({
+      owner,
+      repo,
+      pull_number,
+      merge_method,
+    });
+    return "success";
+  } catch ({ message }) {
+    core.setFailed(message);
+    return "failed";
+  }
+};
 
 export const tryMerge = ({ octokit, owner, repo, pull_number, merge_method }: any) => {
   return retry(
@@ -55,16 +79,7 @@ export const tryMerge = ({ octokit, owner, repo, pull_number, merge_method }: an
   );
 };
 
-const getPullRequest = async ({ octokit, owner, repo, pull_number }: any) => {
-  const { data: pr } = await octokit.pulls.get({
-    owner,
-    repo,
-    pull_number,
-  });
-  return pr;
-};
-
-export async function approvePullRequest({ octokit, owner, repo, pull_number, body }: any) {
+export const approvePullRequest = async ({ octokit, owner, repo, pull_number, body }: any) => {
   try {
     await octokit.pulls.createReview({
       owner,
@@ -77,19 +92,4 @@ export async function approvePullRequest({ octokit, owner, repo, pull_number, bo
     core.setFailed(message);
     return "failed";
   }
-}
-
-async function mergePullRequest({ octokit, owner, repo, pull_number, merge_method }: any) {
-  try {
-    await octokit.pulls.merge({
-      owner,
-      repo,
-      pull_number,
-      merge_method,
-    });
-    return "success";
-  } catch ({ message }) {
-    core.setFailed(message);
-    return "failed";
-  }
-}
+};

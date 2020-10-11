@@ -32,52 +32,41 @@ exports.approvePullRequest = exports.tryMerge = void 0;
 const core = __importStar(require("@actions/core"));
 const mergeRetries = 5;
 const mergeRetrySleep = 60000;
-function retry(retries, retrySleep, doInitial, doRetry, doFailed) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const initialResult = yield doInitial();
-        if (initialResult === "success") {
+const retry = (retries, retrySleep, doInitial, doRetry, doFailed) => __awaiter(void 0, void 0, void 0, function* () {
+    const initialResult = yield doInitial();
+    if (initialResult === "success") {
+        return true;
+    }
+    else if (initialResult === "failure") {
+        return false;
+    }
+    else if (initialResult !== "retry") {
+        throw new Error(`invalid return value: ${initialResult}`);
+    }
+    for (let run = 1; run <= retries; run++) {
+        if (retrySleep === 0) {
+            console.log(`Retrying ... (${run}/${retries})`);
+        }
+        else {
+            console.log(`Retrying after ${retrySleep} ms ... (${run}/${retries})`);
+            yield sleep(retrySleep);
+        }
+        const retryResult = yield doRetry();
+        if (retryResult === "success") {
             return true;
         }
-        else if (initialResult === "failure") {
+        else if (retryResult === "failure") {
             return false;
         }
-        else if (initialResult !== "retry") {
+        else if (retryResult !== "retry") {
             throw new Error(`invalid return value: ${initialResult}`);
         }
-        for (let run = 1; run <= retries; run++) {
-            if (retrySleep === 0) {
-                console.log(`Retrying ... (${run}/${retries})`);
-            }
-            else {
-                console.log(`Retrying after ${retrySleep} ms ... (${run}/${retries})`);
-                yield sleep(retrySleep);
-            }
-            const retryResult = yield doRetry();
-            if (retryResult === "success") {
-                return true;
-            }
-            else if (retryResult === "failure") {
-                return false;
-            }
-            else if (retryResult !== "retry") {
-                throw new Error(`invalid return value: ${initialResult}`);
-            }
-        }
-        yield doFailed();
-        return false;
-    });
-}
-function sleep(ms) {
+    }
+    yield doFailed();
+    return false;
+});
+const sleep = (ms) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
-}
-exports.tryMerge = ({ octokit, owner, repo, pull_number, merge_method }) => {
-    return retry(mergeRetries, mergeRetrySleep, () => mergePullRequest({ octokit, owner, repo, pull_number, merge_method }), () => __awaiter(void 0, void 0, void 0, function* () {
-        const pr = yield getPullRequest({ octokit, owner, repo, pull_number });
-        if (pr.merged === true) {
-            return "success";
-        }
-        return mergePullRequest({ octokit, owner, repo, pull_number, merge_method });
-    }), () => core.setFailed(`PR could not be merged after ${mergeRetries} tries`));
 };
 const getPullRequest = ({ octokit, owner, repo, pull_number }) => __awaiter(void 0, void 0, void 0, function* () {
     const { data: pr } = yield octokit.pulls.get({
@@ -87,38 +76,42 @@ const getPullRequest = ({ octokit, owner, repo, pull_number }) => __awaiter(void
     });
     return pr;
 });
-function approvePullRequest({ octokit, owner, repo, pull_number, body }) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            yield octokit.pulls.createReview({
-                owner,
-                repo,
-                pull_number,
-                body,
-                event: "APPROVE",
-            });
-        }
-        catch ({ message }) {
-            core.setFailed(message);
-            return "failed";
-        }
-    });
-}
-exports.approvePullRequest = approvePullRequest;
-function mergePullRequest({ octokit, owner, repo, pull_number, merge_method }) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            yield octokit.pulls.merge({
-                owner,
-                repo,
-                pull_number,
-                merge_method,
-            });
+const mergePullRequest = ({ octokit, owner, repo, pull_number, merge_method }) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield octokit.pulls.merge({
+            owner,
+            repo,
+            pull_number,
+            merge_method,
+        });
+        return "success";
+    }
+    catch ({ message }) {
+        core.setFailed(message);
+        return "failed";
+    }
+});
+exports.tryMerge = ({ octokit, owner, repo, pull_number, merge_method }) => {
+    return retry(mergeRetries, mergeRetrySleep, () => mergePullRequest({ octokit, owner, repo, pull_number, merge_method }), () => __awaiter(void 0, void 0, void 0, function* () {
+        const pr = yield getPullRequest({ octokit, owner, repo, pull_number });
+        if (pr.merged === true) {
             return "success";
         }
-        catch ({ message }) {
-            core.setFailed(message);
-            return "failed";
-        }
-    });
-}
+        return mergePullRequest({ octokit, owner, repo, pull_number, merge_method });
+    }), () => core.setFailed(`PR could not be merged after ${mergeRetries} tries`));
+};
+exports.approvePullRequest = ({ octokit, owner, repo, pull_number, body }) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield octokit.pulls.createReview({
+            owner,
+            repo,
+            pull_number,
+            body,
+            event: "APPROVE",
+        });
+    }
+    catch ({ message }) {
+        core.setFailed(message);
+        return "failed";
+    }
+});
