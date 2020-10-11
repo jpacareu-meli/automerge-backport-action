@@ -49,6 +49,7 @@ function run() {
                 event: "APPROVE",
                 body: "Github Actions loves this Backport",
             };
+            yield merge_1.approvePullRequest(prInfo);
             yield merge_1.tryMerge(prInfo);
         }
         catch (error) {

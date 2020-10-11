@@ -64,7 +64,7 @@ const getPullRequest = async ({ octokit, owner, repo, pull_number }: any) => {
   return pr;
 };
 
-async function approvePullRequest({ octokit, owner, repo, pull_number, body }: any) {
+export async function approvePullRequest({ octokit, owner, repo, pull_number, body }: any) {
   try {
     await octokit.pulls.createReview({
       owner,

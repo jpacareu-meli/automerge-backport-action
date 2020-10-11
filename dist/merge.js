@@ -28,7 +28,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tryMerge = void 0;
+exports.approvePullRequest = exports.tryMerge = void 0;
 const core = __importStar(require("@actions/core"));
 const mergeRetries = 5;
 const mergeRetrySleep = 60000;
@@ -104,6 +104,7 @@ function approvePullRequest({ octokit, owner, repo, pull_number, body }) {
         }
     });
 }
+exports.approvePullRequest = approvePullRequest;
 function mergePullRequest({ octokit, owner, repo, pull_number, merge_method }) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
