@@ -57,9 +57,11 @@ const mergePullRequest = async ({ octokit, owner, repo, pull_number, merge_metho
       merge_method,
     });
     return "success";
-  } catch ({ message }) {
+  } catch ({ message, stack }) {
     core.setFailed(message);
-    return "failed";
+    core.setFailed(stack);
+
+    return "failure";
   }
 };
 
@@ -80,6 +82,7 @@ export const tryMerge = ({ octokit, owner, repo, pull_number, merge_method }: an
 };
 
 export const approvePullRequest = async ({ octokit, owner, repo, pull_number, body }: any) => {
+  console.log('Approving Pull Request...')
   try {
     await octokit.pulls.createReview({
       owner,
@@ -88,8 +91,9 @@ export const approvePullRequest = async ({ octokit, owner, repo, pull_number, bo
       body,
       event: "APPROVE",
     });
-  } catch ({ message }) {
+  } catch ({ message, stack }) {
     core.setFailed(message);
-    return "failed";
+    core.setFailed(stack);
+    return "failure";
   }
 };

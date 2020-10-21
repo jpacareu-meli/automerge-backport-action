@@ -86,9 +86,10 @@ const mergePullRequest = ({ octokit, owner, repo, pull_number, merge_method }) =
         });
         return "success";
     }
-    catch ({ message }) {
+    catch ({ message, stack }) {
         core.setFailed(message);
-        return "failed";
+        core.setFailed(stack);
+        return "failure";
     }
 });
 exports.tryMerge = ({ octokit, owner, repo, pull_number, merge_method }) => {
@@ -101,6 +102,7 @@ exports.tryMerge = ({ octokit, owner, repo, pull_number, merge_method }) => {
     }), () => core.setFailed(`PR could not be merged after ${mergeRetries} tries`));
 };
 exports.approvePullRequest = ({ octokit, owner, repo, pull_number, body }) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('Approving Pull Request...');
     try {
         yield octokit.pulls.createReview({
             owner,
@@ -110,8 +112,9 @@ exports.approvePullRequest = ({ octokit, owner, repo, pull_number, body }) => __
             event: "APPROVE",
         });
     }
-    catch ({ message }) {
+    catch ({ message, stack }) {
         core.setFailed(message);
-        return "failed";
+        core.setFailed(stack);
+        return "failure";
     }
 });

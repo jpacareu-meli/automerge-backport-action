@@ -43,6 +43,7 @@ function run() {
                 throw new Error("Pull request number is required");
             }
             const prInfo = {
+                octokit,
                 owner: repositoryOwner,
                 repo: repositoryName,
                 pull_number: payload === null || payload === void 0 ? void 0 : payload.number,
